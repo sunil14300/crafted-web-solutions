@@ -1,14 +1,27 @@
-import { Link, useLocation } from "react-router-dom";
-
-const navItems = [
-  { label: "Home", path: "/" },
-  { label: "Search", path: "/search" },
-  { label: "Register", path: "/register" },
-  { label: "Login", path: "/login" },
-];
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isLoggedIn, worker, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  const navItems = isLoggedIn
+    ? [
+        { label: "Home", path: "/" },
+        { label: "Search", path: "/search" },
+      ]
+    : [
+        { label: "Home", path: "/" },
+        { label: "Search", path: "/search" },
+        { label: "Register", path: "/register" },
+        { label: "Login", path: "/login" },
+      ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
@@ -28,6 +41,19 @@ const Navbar = () => {
               {item.label}
             </Link>
           ))}
+          {isLoggedIn && (
+            <>
+              <span className="font-mono text-xs text-muted-foreground">
+                {worker?.name || worker?.registrationId}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="font-mono text-xs uppercase tracking-widest text-destructive hover:opacity-80 transition-opacity"
+              >
+                Logout
+              </button>
+            </>
+          )}
         </div>
       </div>
     </nav>
