@@ -1,13 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const LoginPage = () => {
   const [regId, setRegId] = useState("");
   const [dob, setDob] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Login attempted with ID: ${regId}. Backend not connected yet.`);
+    setLoading(true);
+    try {
+      const data = await api.login(regId, dob);
+      login(data.token, data.worker);
+      toast.success(`Welcome back, ${data.worker.name}!`);
+      navigate("/");
+    } catch (err) {
+      toast.error(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,9 +67,10 @@ const LoginPage = () => {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full h-12 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity"
+              disabled={loading}
+              className="w-full h-12 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              Submit
+              {loading ? "Logging in..." : "Submit"}
             </button>
           </div>
 

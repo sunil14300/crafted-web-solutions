@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const OCCUPATIONS = [
   "Plumber", "Electrician", "Painter", "Mechanic", "Cook", "Carpenter",
@@ -9,20 +12,32 @@ const OCCUPATIONS = [
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: "", address: "", dob: "", mobile: "", email: "",
-    state: "", occupation: "", aadhaar: "", pan: "", priceCharge: "",
+    state: "", occupation: "", aadhaar: "", pan: "", priceCharge: "", password: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [regId, setRegId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const id = "SEVA" + Math.floor(100000 + Math.random() * 900000);
-    setRegId(id);
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      const data = await api.register(formData);
+      setRegId(data.registrationId);
+      login(data.token, { registrationId: data.registrationId, name: formData.name, occupation: formData.occupation });
+      setSubmitted(true);
+      toast.success("Registration successful!");
+    } catch (err) {
+      toast.error(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -38,9 +53,12 @@ const RegisterPage = () => {
           <p className="font-body text-sm text-muted-foreground mb-6">
             Save this ID. You'll need it to login and manage your profile.
           </p>
-          <Link to="/login" className="inline-block px-6 py-3 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity">
-            Go to Login
-          </Link>
+          <button
+            onClick={() => navigate("/")}
+            className="inline-block px-6 py-3 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity"
+          >
+            Go to Home
+          </button>
         </div>
       </div>
     );
@@ -64,6 +82,7 @@ const RegisterPage = () => {
               { name: "aadhaar", label: "Aadhaar Number", type: "text", required: true },
               { name: "pan", label: "PAN Card Number", type: "text", required: false },
               { name: "priceCharge", label: "Price Charge (per task/day)", type: "text", required: true },
+              { name: "password", label: "Password (min 6 chars)", type: "password", required: true },
             ].map((field) => (
               <div key={field.name}>
                 <label className="block font-mono text-xs uppercase tracking-widest text-muted-foreground mb-1">
@@ -101,9 +120,10 @@ const RegisterPage = () => {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full h-12 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity"
+                disabled={loading}
+                className="w-full h-12 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                Register
+                {loading ? "Registering..." : "Register"}
               </button>
             </div>
 
