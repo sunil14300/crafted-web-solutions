@@ -5,9 +5,8 @@ const LoginPage = () => {
   const [regId, setRegId] = useState("");
   const [dob, setDob] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // Frontend only — no actual auth
     alert(`Login attempted with ID: ${regId}. Backend not connected yet.`);
   };
 

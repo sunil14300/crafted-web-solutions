@@ -14,11 +14,11 @@ const RegisterPage = () => {
   const [submitted, setSubmitted] = useState(false);
   const [regId, setRegId] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const id = "SEVA" + Math.floor(100000 + Math.random() * 900000);
     setRegId(id);
@@ -73,7 +73,7 @@ const RegisterPage = () => {
                   name={field.name}
                   type={field.type}
                   required={field.required}
-                  value={formData[field.name as keyof typeof formData]}
+                  value={formData[field.name]}
                   onChange={handleChange}
                   className="w-full h-11 px-4 bg-card border border-border font-body text-sm focus:outline-none focus:border-primary transition-colors"
                 />

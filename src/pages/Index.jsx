@@ -28,14 +28,14 @@ const Index = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
-  const handleCategoryClick = (name: string) => {
+  const handleCategoryClick = (name) => {
     navigate(`/search?q=${encodeURIComponent(name)}`);
   };
 

@@ -2,19 +2,7 @@ import { Search, MapPin, Star } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-interface Worker {
-  id: string;
-  name: string;
-  occupation: string;
-  location: string;
-  state: string;
-  age: number;
-  price: string;
-  rating: number;
-  available: boolean;
-}
-
-const MOCK_WORKERS: Worker[] = [
+const MOCK_WORKERS = [
   { id: "SEVA123456", name: "Ankit Kumar", occupation: "Plumber", location: "Chinhat, Lucknow", state: "Uttar Pradesh", age: 22, price: "₹300/task", rating: 4.5, available: true },
   { id: "SEVA123457", name: "Pawan Kumar", occupation: "Bike Mechanic", location: "Gomti Nagar, Lucknow", state: "Uttar Pradesh", age: 32, price: "₹200/task", rating: 4.2, available: true },
   { id: "SEVA123458", name: "Ravi Singh", occupation: "Electrician", location: "Aliganj, Lucknow", state: "Uttar Pradesh", age: 28, price: "₹350/task", rating: 4.8, available: false },
@@ -39,7 +27,6 @@ const SearchPage = () => {
   return (
     <div className="pt-14">
       <section className="container py-10">
-        {/* Search bar */}
         <div className="mb-8">
           <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Search Results {query && `for "${query}"`}
@@ -58,12 +45,10 @@ const SearchPage = () => {
           </div>
         </div>
 
-        {/* Results count */}
         <p className="font-mono text-xs text-muted-foreground mb-6">
           {filteredWorkers.length} worker{filteredWorkers.length !== 1 ? "s" : ""} found
         </p>
 
-        {/* Worker cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredWorkers.map((worker) => (
             <div key={worker.id} className="worker-card">
