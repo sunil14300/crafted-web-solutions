@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const workerRoutes = require("./routes/workers");
 const bookingRoutes = require("./routes/bookings");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
