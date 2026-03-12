@@ -36,4 +36,34 @@ export const api = {
   createBooking(data) {
     return this.request("/bookings", { method: "POST", body: JSON.stringify(data) });
   },
+  getMyBookings() {
+    return this.request("/bookings/my");
+  },
+
+  // Admin
+  adminGetUsers(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/admin/users?${query}`);
+  },
+  adminGetUser(id) {
+    return this.request(`/admin/users/${id}`);
+  },
+  adminUpdateUser(id, updates) {
+    return this.request(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(updates) });
+  },
+  adminDeleteUser(id) {
+    return this.request(`/admin/users/${id}`, { method: "DELETE" });
+  },
+  adminGetBookings() {
+    return this.request("/admin/bookings");
+  },
+  adminUpdateBooking(id, updates) {
+    return this.request(`/admin/bookings/${id}`, { method: "PATCH", body: JSON.stringify(updates) });
+  },
+  adminDeleteBooking(id) {
+    return this.request(`/admin/bookings/${id}`, { method: "DELETE" });
+  },
+  adminGetStats() {
+    return this.request("/admin/stats");
+  },
 };
