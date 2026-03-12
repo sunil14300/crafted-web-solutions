@@ -16,9 +16,17 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const data = await api.login(regId, dob);
-      login(data.token, data.worker);
-      toast.success(`Welcome back, ${data.worker.name}!`);
-      navigate("/");
+      login(data.token, data.user);
+      toast.success(`Welcome back, ${data.user.name}!`);
+
+      // Role-based redirect
+      if (data.user.role === "admin") {
+        navigate("/admin");
+      } else if (data.user.role === "worker") {
+        navigate("/dashboard");
+      } else {
+        navigate("/search");
+      }
     } catch (err) {
       toast.error(err.message || "Login failed");
     } finally {
@@ -30,10 +38,10 @@ const LoginPage = () => {
     <div className="pt-14 min-h-screen flex items-center justify-center">
       <div className="form-panel w-full">
         <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-2">
-          Worker Portal
+          User Portal
         </p>
         <h1 className="text-3xl font-bold tracking-tight mb-8">
-          ID Login
+          Login
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -45,7 +53,7 @@ const LoginPage = () => {
               type="text"
               value={regId}
               onChange={(e) => setRegId(e.target.value)}
-              placeholder="e.g. SEVA123456"
+              placeholder="e.g. SEVA123456 or CUST123456"
               required
               className="w-full h-11 px-4 bg-background border border-border font-mono text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
             />
@@ -70,7 +78,7 @@ const LoginPage = () => {
               disabled={loading}
               className="w-full h-12 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {loading ? "Logging in..." : "Submit"}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </div>
 

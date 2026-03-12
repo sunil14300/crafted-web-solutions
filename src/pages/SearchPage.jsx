@@ -2,6 +2,7 @@ import { Search, MapPin, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 const SearchPage = () => {
@@ -11,6 +12,9 @@ const SearchPage = () => {
   const [workers, setWorkers] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [bookingWorker, setBookingWorker] = useState(null);
+  const [bookingForm, setBookingForm] = useState({ customerName: "", customerMobile: "", customerAddress: "", serviceDate: "", agreedPrice: "", description: "" });
+  const { isLoggedIn, isCustomer } = useAuth();
 
   const fetchWorkers = async (q) => {
     setLoading(true);
@@ -33,14 +37,68 @@ const SearchPage = () => {
     fetchWorkers(query);
   }, []);
 
-  const handleSearch = (e) => {
-    if (e.key === "Enter" || e.type === "change") {
-      fetchWorkers(query);
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    try {
+      await api.createBooking({ ...bookingForm, workerId: bookingWorker.registrationId });
+      toast.success("Booking created!");
+      setBookingWorker(null);
+      setBookingForm({ customerName: "", customerMobile: "", customerAddress: "", serviceDate: "", agreedPrice: "", description: "" });
+    } catch (err) {
+      toast.error(err.message || "Booking failed");
     }
   };
 
   return (
     <div className="pt-14">
+      {/* Booking Modal */}
+      {bookingWorker && (
+        <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Book Worker</p>
+                <h3 className="font-mono text-lg font-bold">{bookingWorker.name}</h3>
+                <p className="font-mono text-xs text-muted-foreground">{bookingWorker.occupation} · {bookingWorker.priceCharge}</p>
+              </div>
+              <button onClick={() => setBookingWorker(null)} className="font-mono text-xs text-destructive">✕</button>
+            </div>
+            <form onSubmit={handleBooking} className="space-y-3">
+              {[
+                { name: "customerName", label: "Your Name", type: "text" },
+                { name: "customerMobile", label: "Your Mobile", type: "tel" },
+                { name: "customerAddress", label: "Service Address", type: "text" },
+                { name: "serviceDate", label: "Service Date", type: "date" },
+                { name: "agreedPrice", label: "Agreed Price (₹)", type: "number" },
+              ].map((f) => (
+                <div key={f.name}>
+                  <label className="block font-mono text-xs uppercase tracking-widest text-muted-foreground mb-1">{f.label}</label>
+                  <input
+                    type={f.type}
+                    required
+                    value={bookingForm[f.name]}
+                    onChange={(e) => setBookingForm({ ...bookingForm, [f.name]: e.target.value })}
+                    className="w-full h-10 px-3 bg-background border border-border font-body text-sm focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+              ))}
+              <div>
+                <label className="block font-mono text-xs uppercase tracking-widest text-muted-foreground mb-1">Description (optional)</label>
+                <textarea
+                  value={bookingForm.description}
+                  onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
+                  className="w-full h-20 px-3 py-2 bg-background border border-border font-body text-sm focus:outline-none focus:border-primary transition-colors resize-none"
+                />
+              </div>
+              <p className="font-mono text-[10px] text-muted-foreground">7% commission will be applied</p>
+              <button type="submit" className="w-full h-10 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition-opacity">
+                Confirm Booking
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <section className="container py-10">
         <div className="mb-8">
           <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
@@ -86,9 +144,14 @@ const SearchPage = () => {
                           {worker.occupation}
                         </p>
                       </div>
-                      <span className={worker.available ? "status-available" : "status-booked"}>
-                        {worker.available ? "Available" : "Booked"}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={worker.available ? "status-available" : "status-booked"}>
+                          {worker.available ? "Available" : "Booked"}
+                        </span>
+                        {worker.verified && (
+                          <span className="font-mono text-[10px] text-primary uppercase tracking-wider">✓ Verified</span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-2 mb-4">
@@ -104,12 +167,18 @@ const SearchPage = () => {
 
                     <div className="flex items-center justify-between pt-4 border-t border-border">
                       <span className="font-mono text-sm font-bold">{worker.priceCharge}</span>
-                      <button
-                        disabled={!worker.available}
-                        className="px-4 py-2 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-                      >
-                        Book Now
-                      </button>
+                      {isCustomer && (
+                        <button
+                          disabled={!worker.available}
+                          onClick={() => setBookingWorker(worker)}
+                          className="px-4 py-2 bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                        >
+                          Book Now
+                        </button>
+                      )}
+                      {!isLoggedIn && (
+                        <span className="font-mono text-[10px] text-muted-foreground">Login as customer to book</span>
+                      )}
                     </div>
 
                     <p className="font-mono text-[10px] text-muted-foreground mt-3 uppercase tracking-wider">

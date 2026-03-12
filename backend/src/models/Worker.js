@@ -9,18 +9,32 @@ const workerSchema = new mongoose.Schema(
     mobile: { type: String, required: true },
     email: { type: String, trim: true, lowercase: true },
     state: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ["worker", "customer", "admin"],
+      default: "worker",
+      required: true,
+    },
+    verified: { type: Boolean, default: false },
+    // Worker-only fields
     occupation: {
       type: String,
-      required: true,
       enum: [
         "Plumber", "Electrician", "Painter", "Mechanic", "Cook",
         "Carpenter", "Barber", "Sweeper", "Mason", "Driver",
         "Helper", "Cobbler", "Technical Person", "Labour",
       ],
+      required: function () { return this.role === "worker"; },
     },
-    aadhaar: { type: String, required: true },
+    aadhaar: {
+      type: String,
+      required: function () { return this.role === "worker"; },
+    },
     pan: { type: String },
-    priceCharge: { type: String, required: true },
+    priceCharge: {
+      type: String,
+      required: function () { return this.role === "worker"; },
+    },
     rating: { type: Number, default: 0, min: 0, max: 5 },
     totalRatings: { type: Number, default: 0 },
     available: { type: Boolean, default: true },
